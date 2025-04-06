@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,14 +21,15 @@ public class Pelicula {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
-    @Column
+    @Column(nullable = false, length = 100)
     private String titulo;
-    @Column
+    @Column(nullable = false, precision = 4)
+    @Max(value = 9999, message = "El año no puede ser mayor a 9999")
     private Integer anno;
-    @Column
+    @Column(nullable = false, length = 100)
     private String director;
-    @Column
+    @Column(nullable = false, length = 50)
     private String genero;
-    @Column
+    @Column(nullable = false, length = 255)
     private String sinopsis;
 }
