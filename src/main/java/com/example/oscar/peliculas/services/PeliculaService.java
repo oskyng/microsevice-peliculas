@@ -1,5 +1,7 @@
 package com.example.oscar.peliculas.services;
 
+import com.example.oscar.peliculas.entity.CreatePeliculaRequest;
+import com.example.oscar.peliculas.entity.UpdatePeliculaRequest;
 import com.example.oscar.peliculas.exception.PeliculaNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +15,6 @@ import java.util.Optional;
 
 @Service
 public class PeliculaService {
-    private final List<Pelicula> peliculas = new ArrayList<>();
-    
     @Autowired
     private IPeliculaRepository peliculaRepository;
 
@@ -26,20 +26,34 @@ public class PeliculaService {
         return peliculaRepository.findById(id).orElseThrow(() -> new PeliculaNotFoundException(id));
     }
 
-    public Pelicula guardar(Pelicula pelicula) {
-        peliculas.add(pelicula);
-        return pelicula;
+    public Pelicula guardar(CreatePeliculaRequest request) {
+        Pelicula pelicula = new Pelicula();
+        pelicula.setTitulo(request.getTitulo());
+        pelicula.setAnno(request.getAnno());
+        pelicula.setGenero(request.getGenero());
+        pelicula.setDirector(request.getDirector());
+        pelicula.setSinopsis(request.getSinopsis());
+
+        return peliculaRepository.save(pelicula);
     }
 
-    public Pelicula actualizar(Long id, Pelicula pelicula) {
-        Optional<Pelicula> findPelicula = peliculas.stream().filter(p -> p.getId().equals(id)).findFirst();
+    public Pelicula actualizar(UpdatePeliculaRequest request) {
+        Optional<Pelicula> findPelicula = peliculaRepository.findById(request.getId());
         return findPelicula.map(p -> {
-            p.setTitulo((pelicula.getTitulo() != null) ? pelicula.getTitulo() : p.getTitulo());
-            p.setAnno((pelicula.getAnno() != null) ? pelicula.getAnno() : p.getAnno());
-            p.setDirector((pelicula.getDirector() != null) ? pelicula.getDirector() : p.getDirector());
-            p.setGenero((pelicula.getGenero() != null) ? pelicula.getGenero() : p.getGenero());
-            p.setSinopsis((pelicula.getSinopsis() != null) ? pelicula.getSinopsis() : p.getSinopsis());
-            return p;
-        }).orElse(null);
+            p.setId(request.getId());
+            p.setTitulo((request.getTitulo() != null) ? request.getTitulo() : p.getTitulo());
+            p.setAnno((request.getAnno() != null) ? request.getAnno() : p.getAnno());
+            p.setDirector((request.getDirector() != null) ? request.getDirector() : p.getDirector());
+            p.setGenero((request.getGenero() != null) ? request.getGenero() : p.getGenero());
+            p.setSinopsis((request.getSinopsis() != null) ? request.getSinopsis() : p.getSinopsis());
+
+            return peliculaRepository.save(p);
+
+        }).orElseThrow(() -> new PeliculaNotFoundException(request.getId()));
+    }
+
+    public void eliminar(Long id) {
+        Pelicula findPelicula = peliculaRepository.findById(id).orElseThrow(() -> new PeliculaNotFoundException(id));
+        peliculaRepository.delete(findPelicula);
     }
 }
