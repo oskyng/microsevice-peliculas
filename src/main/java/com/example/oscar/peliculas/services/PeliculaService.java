@@ -3,30 +3,37 @@ package com.example.oscar.peliculas.services;
 import com.example.oscar.peliculas.entity.CreatePeliculaRequest;
 import com.example.oscar.peliculas.entity.UpdatePeliculaRequest;
 import com.example.oscar.peliculas.exception.PeliculaNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.oscar.peliculas.model.Pelicula;
 import com.example.oscar.peliculas.repository.IPeliculaRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class PeliculaService {
-    @Autowired
-    private IPeliculaRepository peliculaRepository;
+    private final IPeliculaRepository peliculaRepository;
+
+    public PeliculaService(IPeliculaRepository peliculaRepository) {
+        this.peliculaRepository = peliculaRepository;
+    }
 
     public List<Pelicula> obtenerTodas() {
-        return peliculaRepository.findAll();
+        log.debug("Servicio: obtenerTodas()");
+        return peliculaRepository.findAll(Sort.by("id").ascending());
     }
 
     public Pelicula obtenerPorId(Long id) {
+        log.debug("Servicio: obtenerPorId({})", id);
         return peliculaRepository.findById(id).orElseThrow(() -> new PeliculaNotFoundException(id));
     }
 
     public Pelicula guardar(CreatePeliculaRequest request) {
+        log.debug("Servicio: guardar({})", request.getTitulo());
         Pelicula pelicula = new Pelicula();
         pelicula.setTitulo(request.getTitulo());
         pelicula.setAnno(request.getAnno());
@@ -38,6 +45,7 @@ public class PeliculaService {
     }
 
     public Pelicula actualizar(UpdatePeliculaRequest request) {
+        log.debug("Servicio: actualizar({})", request.getTitulo());
         Optional<Pelicula> findPelicula = peliculaRepository.findById(request.getId());
         return findPelicula.map(p -> {
             p.setId(request.getId());
@@ -53,6 +61,7 @@ public class PeliculaService {
     }
 
     public void eliminar(Long id) {
+        log.debug("Servicio: eliminar({})", id);
         Pelicula findPelicula = peliculaRepository.findById(id).orElseThrow(() -> new PeliculaNotFoundException(id));
         peliculaRepository.delete(findPelicula);
     }
